@@ -12,25 +12,22 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Currency;
-import java.util.List;
 
 @RestController
 @RequestMapping("/currency")
-public class CurrencyRateController {
+class CurrencyRateController {
 
     @Autowired
     private CurrencyRateSource currencyRateSource;
 
     @GetMapping
     private Flux<CurrencyRate> getAllRates() {
-        List<CurrencyRate> rates = currencyRateSource.getCurrencies();
-        return Flux.fromIterable(rates);
+        return currencyRateSource.getCurrencies();
     }
 
     @GetMapping("/{code}")
     private Mono<CurrencyRate> getCurrencyRateByCode(@PathVariable String code) {
         Currency currency = CurrencyProvider.getCurrency(code.toUpperCase());
-        CurrencyRate currencyRate = currencyRateSource.getCurrency(currency);
-        return Mono.just(currencyRate);
+        return currencyRateSource.getCurrency(currency);
     }
 }

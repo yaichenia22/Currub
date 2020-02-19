@@ -1,18 +1,17 @@
 package com.abu.sandbox.currencysource.impl;
 
-import com.abu.sandbox.currencysource.api.CurrencyRateSource;
 import com.abu.sandbox.currencysource.api.CurrencyRate;
+import com.abu.sandbox.currencysource.api.CurrencyRateSource;
 import com.abu.sandbox.monobank.api.MonobankCurrencyRate;
 import com.abu.sandbox.monobank.api.MonobankCurrencyRestClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Currency;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+@Component
 public class MonobankCurrencyRateSource implements CurrencyRateSource {
 
     @Autowired
@@ -22,34 +21,26 @@ public class MonobankCurrencyRateSource implements CurrencyRateSource {
     private MonobankCurrencyRestClient monobankClient;
 
     @Override
-    public CurrencyRate getCurrency(Currency currency) {
-        Flux<MonobankCurrencyRate> currencies = retrieveCurrencies();
-        return preprocessFlux(currencies.toStream())
+    public Mono<CurrencyRate> getCurrency(Currency currency) {
+        Flux<MonobankCurrencyRate> currencies = monobankClient.getMonoCurrenciesRates();
+        return Mono.from(preprocessFlux(currencies)
                 .filter(rate -> rate.getCurrencyCodeA() == currency.getNumericCode())
-                .findFirst()
-                .map(rate -> new CurrencyRate(currency, rate.getRateBuy(), rate.getRateSell(), rate.getDate()))
-                .orElse(null);
+                .map(rate -> new CurrencyRate(currency, rate.getRateBuy(), rate.getRateSell(), rate.getDate())));
     }
 
     @Override
-    public List<CurrencyRate> getCurrencies() {
-        Flux<MonobankCurrencyRate> currencies = retrieveCurrencies();
-        return preprocessFlux(currencies.toStream())
+    public Flux<CurrencyRate> getCurrencies() {
+        Flux<MonobankCurrencyRate> currencies = monobankClient.getMonoCurrenciesRates();
+        return preprocessFlux(currencies)
                 .map(rate -> new CurrencyRate(
                         currenciesCache.getCurrency(
                                 rate.getCurrencyCodeA()),
                         rate.getRateBuy(),
                         rate.getRateSell(),
-                        rate.getDate()))
-                .collect(Collectors.toList());
+                        rate.getDate()));
     }
 
-    private Flux<MonobankCurrencyRate> retrieveCurrencies() {
-        ClientResponse monoCurrenciesResponse = monobankClient.getMonoCurrenciesResponse();
-        return monoCurrenciesResponse.bodyToFlux(MonobankCurrencyRate.class);
-    }
-
-    private Stream<MonobankCurrencyRate> preprocessFlux(Stream<MonobankCurrencyRate> flux) {
+    private Flux<MonobankCurrencyRate> preprocessFlux(Flux<MonobankCurrencyRate> flux) {
         return flux
                 .filter(rate -> rate.getCurrencyCodeB() == Currency.getInstance("UAH").getNumericCode())
                 .filter(rate -> rate.getRateSell() != null && rate.getRateBuy() != null);

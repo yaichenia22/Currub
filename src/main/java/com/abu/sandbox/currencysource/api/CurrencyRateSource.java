@@ -1,11 +1,13 @@
 package com.abu.sandbox.currencysource.api;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.util.Currency;
-import java.util.List;
 
 public interface CurrencyRateSource {
 
-    CurrencyRate getCurrency(Currency currency);
+    Mono<CurrencyRate> getCurrency(Currency currency);
 
-    List<CurrencyRate> getCurrencies();
+    Flux<CurrencyRate> getCurrencies();
 }

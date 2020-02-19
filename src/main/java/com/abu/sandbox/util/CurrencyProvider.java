@@ -9,8 +9,8 @@ public class CurrencyProvider {
     public static Currency getCurrency(String code) {
         try {
             return Currency.getInstance(code);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidCurrencyCodeException(e.getMessage(), e);
+        } catch (IllegalArgumentException ex) {
+            throw new InvalidCurrencyCodeException(ex.getMessage(), ex);
         }
     }
 }

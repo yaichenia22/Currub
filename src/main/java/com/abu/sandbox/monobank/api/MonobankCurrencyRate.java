@@ -61,6 +61,24 @@ public class MonobankCurrencyRate {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MonobankCurrencyRate that = (MonobankCurrencyRate) o;
+
+        if (currencyCodeA != that.currencyCodeA) return false;
+        return currencyCodeB == that.currencyCodeB;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = currencyCodeA;
+        result = 31 * result + currencyCodeB;
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "MonobankCurrencyRate{" +
                 "currencyCodeA=" + currencyCodeA +

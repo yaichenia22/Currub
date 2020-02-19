@@ -1,8 +1,11 @@
 package com.abu.sandbox.currencysource.impl;
 
+import org.springframework.stereotype.Component;
+
 import java.util.Currency;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 class CurrenciesCache {
 
     private ConcurrentHashMap<Integer, Currency> cache = new ConcurrentHashMap<>();
